@@ -7,6 +7,20 @@
 
 A Formik inspired form library that uses MobX under the hood and update only the changed fields.
 
+## Installation
+
+Using npm:
+
+```bash
+npm install @euk-labs/formix mobx
+```
+
+Using yarn:
+
+```bash
+yarn add @euk-labs/formix mobx
+```
+
 ## Example
 
 ### Creating your first input
