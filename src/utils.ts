@@ -12,10 +12,8 @@ export function stringToPath(string: string): Array<string | number> {
 
       if (arrayPath) {
         if (arrayPath.length) {
-          console.log(result, arrayPath);
           result.push(arrayPath[0]);
           result.push(Number(arrayPath[1]));
-          console.log(result, arrayPath);
         }
       }
     } else {
