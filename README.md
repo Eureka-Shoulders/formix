@@ -1,11 +1,35 @@
-# formix
+# Formix
+
+![npm](https://img.shields.io/npm/v/@euk-labs/formix)
+![NPM](https://img.shields.io/npm/l/@euk-labs/formix)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/Eureka-Shoulders/formix/CI)
+![npm](https://img.shields.io/npm/dw/@euk-labs/formix)
 
 A Formik inspired form library that uses MobX under the hood and update only the changed fields.
 
 ## Example
 
+### Creating your first input
+
 ```tsx
-import { Formix, TextField } from '@euk-labs/formix';
+import { useField } from '@euk-labs/formix';
+import { InputHTMLAttributes } from 'react';
+
+function TextField(
+  props: InputHTMLAttributes<HTMLInputElement> & { name: string }
+) {
+  const { name, ...rest } = props;
+  const { field } = useField(name);
+
+  return <input {...rest} {...field} />;
+}
+```
+
+### Creating your first form
+
+```tsx
+import { Formix } from '@euk-labs/formix';
+import { TextField } from './TextField';
 
 const initialValues = {
   firstName: '',
