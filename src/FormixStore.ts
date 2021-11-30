@@ -40,10 +40,12 @@ export default class FormixStore<T extends object> {
     this._isSubmitting = bool;
   }
 
+  // TODO: improve types
   private handleChange(event: React.ChangeEvent<any>) {
     this.setFieldValue(event.target.name, event.target.value);
   }
 
+  // TODO: improve types
   private handleBlur(event: React.FocusEvent<any>) {
     set(this._toucheds, event.target.name, true);
     this.validate();
@@ -66,6 +68,7 @@ export default class FormixStore<T extends object> {
     this.validate();
   }
 
+  // TODO: improve types
   setFieldValue(name: string, value: any) {
     set(this._values, name, value);
     this.validate();
@@ -94,6 +97,7 @@ export default class FormixStore<T extends object> {
   }
 
   getFieldHelpers(name: string) {
+    // TODO: improve types
     const helpers = {
       setValue: (value: any) => this.setFieldValue(name, value),
     };

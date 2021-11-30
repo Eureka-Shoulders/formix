@@ -1,4 +1,4 @@
-import { AnySchema, ObjectSchema } from 'yup';
+import { ObjectSchema } from 'yup';
 import { ZodType } from 'zod';
 
 export interface ArrayHelpers {
@@ -9,6 +9,7 @@ export interface ArrayHelpers {
 
 export type PathParam = Array<string | number> | string;
 
+// TODO: improve types
 export interface FormixProps<T extends object> {
   initialValues: T;
   children: React.ReactNode;
@@ -17,5 +18,6 @@ export interface FormixProps<T extends object> {
   onSubmit(values: T): Promise<void> | void;
 }
 
+// TODO: improve types
 export type MultiSchema = ObjectSchema<any> | ZodType<any, any, any>;
 export type ValidationLib = 'yup' | 'zod';
