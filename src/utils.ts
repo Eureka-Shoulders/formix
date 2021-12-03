@@ -37,7 +37,7 @@ const isObject = (input: unknown) =>
  */
 
 export function get(object: object, path: PathParam) {
-  // TODO: improve types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let result = object as any;
 
   if (typeof path === 'string') path = stringToPath(path);
@@ -62,13 +62,16 @@ export function get(object: object, path: PathParam) {
   return result;
 }
 
-// TODO: improve types
-export function set(object: Record<any, any>, path: PathParam, value: unknown) {
+export function set(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  object: Record<string, any>,
+  path: PathParam,
+  value: unknown
+) {
   if (typeof path === 'string') path = stringToPath(path);
 
-  // TODO: improve types
   function createNewElement(
-    object: Record<any, any>,
+    object: Record<string, unknown>,
     path: PathParam,
     pathIndex: number,
     elem: string | number

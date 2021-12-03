@@ -11,7 +11,7 @@ function TextField(
   props: InputHTMLAttributes<HTMLInputElement> & { name: string }
 ) {
   const { name, ...rest } = props;
-  const { field } = useField(name);
+  const { field } = useField<string, HTMLInputElement>(name);
 
   return <input {...rest} {...field} />;
 }

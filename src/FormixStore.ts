@@ -1,27 +1,28 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx';
 import { ValidationError } from 'yup';
 import { ZodError } from 'zod';
-import { MultiSchema, ValidationLib } from './types';
+import { FieldHelpers, FieldMeta, FieldProps } from '.';
+import { ValidationLib } from './types';
 import { get, set } from './utils';
 
-export default class FormixStore<T extends object> {
+export default class FormixStore<T extends object, Schema> {
   private _isSubmitting = false;
   private _initialValues: T;
   private _values: T;
   private _errors: Partial<T> = {};
   private _toucheds: Partial<T> = {};
   private _fields: string[] = [];
-  private _validationSchema?: MultiSchema;
+  private _validationSchema?: Schema;
   private _validationLib?: ValidationLib;
   private _onSubmit: (values: T) => Promise<void> | void;
 
   constructor(
     initialValues: T,
     onSubmit: (values: T) => void,
-    validationSchema?: MultiSchema,
+    validationSchema?: Schema,
     validationLib?: ValidationLib
   ) {
-    makeAutoObservable<FormixStore<T>, '_onSubmit'>(
+    makeAutoObservable<FormixStore<T, Schema>, '_onSubmit'>(
       this,
       {
         _onSubmit: false,
@@ -40,13 +41,13 @@ export default class FormixStore<T extends object> {
     this._isSubmitting = bool;
   }
 
-  // TODO: improve types
-  private handleChange(event: React.ChangeEvent<any>) {
+  private handleChange<T extends HTMLInputElement>(
+    event: React.ChangeEvent<T>
+  ) {
     this.setFieldValue(event.target.name, event.target.value);
   }
 
-  // TODO: improve types
-  private handleBlur(event: React.FocusEvent<any>) {
+  private handleBlur<T extends HTMLInputElement>(event: React.FocusEvent<T>) {
     set(this._toucheds, event.target.name, true);
     this.validate();
   }
@@ -68,16 +69,17 @@ export default class FormixStore<T extends object> {
     this.validate();
   }
 
-  // TODO: improve types
-  setFieldValue(name: string, value: any) {
+  setFieldValue<Value>(name: string, value: Value) {
     set(this._values, name, value);
     this.validate();
   }
 
-  getFieldProps(name: string) {
+  getFieldProps<Value, Element extends HTMLInputElement>(
+    name: string
+  ): FieldProps<Value, Element> {
     const field = {
       name,
-      value: this.getValue(name),
+      value: this.getValue<Value>(name),
       onChange: this.handleChange,
       onBlur: this.handleBlur,
     };
@@ -85,10 +87,10 @@ export default class FormixStore<T extends object> {
     return field;
   }
 
-  getFieldMeta(name: string) {
+  getFieldMeta<Value>(name: string): FieldMeta<Value> {
     const meta = {
-      initialValue: this.getInitialValue(name),
-      value: this.getValue(name),
+      initialValue: this.getInitialValue<Value>(name),
+      value: this.getValue<Value>(name),
       error: this.getError(name),
       touched: this.getTouched(name),
     };
@@ -96,21 +98,20 @@ export default class FormixStore<T extends object> {
     return meta;
   }
 
-  getFieldHelpers(name: string) {
-    // TODO: improve types
+  getFieldHelpers<Value>(name: string): FieldHelpers<Value> {
     const helpers = {
-      setValue: (value: any) => this.setFieldValue(name, value),
+      setValue: (value: Value) => this.setFieldValue<Value>(name, value),
     };
 
     return helpers;
   }
 
-  getValue(name: string) {
-    return get(this._values, name);
+  getValue<Value>(name: string) {
+    return get(this._values, name) as Value;
   }
 
-  getInitialValue(name: string) {
-    return get(this._initialValues, name);
+  getInitialValue<Value>(name: string) {
+    return get(this._initialValues, name) as Value;
   }
 
   /**
