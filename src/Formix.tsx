@@ -3,6 +3,16 @@ import { FormContext } from './formixContext';
 import FormixStore from './FormixStore';
 import { FormixProps, ValidationLib } from './types';
 
+/**
+ * A component that helps you with building forms. It provides a context that
+ * you can use to access the form state and methods.
+ * It receives the initial values to build the form and the onSubmit function to
+ * handle the form submission.
+ *
+ * As optional parameter, you can pass a yup schema or a zod schema to validate
+ * the form values. But you can use only one of them.
+ * @param props - The props of the component.
+ */
 export default function Formix<T extends object>(props: FormixProps<T>) {
   const { initialValues, children, onSubmit, yupSchema, zodSchema } = props;
 
@@ -32,6 +42,7 @@ export default function Formix<T extends object>(props: FormixProps<T>) {
     [] // eslint-disable-line
   );
 
+  // TODO: improve this type
   function handleSubmit(event: any) {
     event.preventDefault();
 
