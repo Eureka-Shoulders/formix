@@ -106,20 +106,20 @@ export default class FormixStore<T extends object, Schema> {
     return helpers;
   }
 
-  getValue<Value>(name: string) {
-    return get(this._values, name) as Value;
+  getValue<Value>(name: string): Value {
+    return get(this._values, name);
   }
 
-  getInitialValue<Value>(name: string) {
-    return get(this._initialValues, name) as Value;
+  getInitialValue<Value>(name: string): Value {
+    return get(this._initialValues, name);
   }
 
   /**
    * Errors
    */
 
-  getError(name: string) {
-    return get(this._errors, name) as string;
+  getError(name: string): string {
+    return get(this._errors, name);
   }
 
   setError(name: string, error: string | null) {
@@ -136,8 +136,8 @@ export default class FormixStore<T extends object, Schema> {
     });
   }
 
-  getTouched(name: string) {
-    return get(this._toucheds, name) as boolean;
+  getTouched(name: string): boolean {
+    return !!get(this._toucheds, name);
   }
 
   touchAll() {
