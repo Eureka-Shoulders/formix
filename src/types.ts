@@ -1,6 +1,6 @@
-import { ObjectSchema } from 'yup';
-import { ZodType } from 'zod';
+import React from 'react';
 
+// TODO: discuss about the best way to handle this types
 export interface ArrayHelpers {
   values: unknown[];
   push(item: unknown): void;
@@ -9,15 +9,30 @@ export interface ArrayHelpers {
 
 export type PathParam = Array<string | number> | string;
 
-// TODO: improve types
-export interface FormixProps<T extends object> {
+export interface FormixProps<T extends object, Schema extends object> {
   initialValues: T;
   children: React.ReactNode;
-  yupSchema?: ObjectSchema<any>;
-  zodSchema?: ZodType<any, any, any>;
+  yupSchema?: Schema;
+  zodSchema?: Schema;
   onSubmit(values: T): Promise<void> | void;
 }
 
-// TODO: improve types
-export type MultiSchema = ObjectSchema<any> | ZodType<any, any, any>;
 export type ValidationLib = 'yup' | 'zod';
+
+export interface FieldProps<T, Element> {
+  name: string;
+  value: T;
+  onChange(event: React.ChangeEvent<Element>): void;
+  onBlur(event: React.FocusEvent<Element>): void;
+}
+
+export interface FieldMeta<T> {
+  initialValue: T;
+  value: T;
+  error: string | null;
+  touched: boolean;
+}
+
+export interface FieldHelpers<T> {
+  setValue(value: T): void;
+}
