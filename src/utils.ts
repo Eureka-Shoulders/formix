@@ -84,7 +84,7 @@ export function set(
   }
 
   const length = path.length;
-  // changes second last key to {}
+
   for (let i = 0; i < length - 1; i++) {
     const elem = path[i];
 
