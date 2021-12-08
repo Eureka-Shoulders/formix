@@ -7,7 +7,7 @@ import { useFormixContext } from './formixContext';
  * It provides the properties of the field and a way to update its value.
  * @param name The name of the array field.
  */
-export default function useField<T, Element extends HTMLInputElement>(
+export default function useField<T, Element extends HTMLInputElement = HTMLInputElement>(
   name: string
 ) {
   const formix = useFormixContext();
