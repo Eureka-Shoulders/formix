@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { FormContext } from './formixContext';
 import FormixStore from './FormixStore';
 import { FormixProps, ValidationLib } from './types';

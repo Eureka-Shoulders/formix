@@ -45,6 +45,7 @@ rimraf(distFolder, (err) => {
     },
     tsconfig: 'tsconfig.json',
     minify: true,
+    inject: ['./scripts/react-shim.js'],
   });
   console.timeEnd('Generating ESM output...');
 
@@ -63,6 +64,7 @@ rimraf(distFolder, (err) => {
     },
     tsconfig: 'tsconfig.json',
     minify: true,
+    inject: ['./scripts/react-shim.js'],
   });
   console.timeEnd('Generating CJS output...');
 });
