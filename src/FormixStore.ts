@@ -1,9 +1,9 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx';
-import { ValidationError } from 'yup';
-import { ZodError } from 'zod';
 import { FieldHelpers, FieldMeta, FieldProps } from '.';
 import { ValidationLib } from './types';
 import { get, set } from './utils';
+import { ZodError } from 'zod';
+import { ObjectSchema, ValidationError } from 'yup';
 
 export default class FormixStore<T extends object, Schema> {
   private _isSubmitting = false;
@@ -153,17 +153,7 @@ export default class FormixStore<T extends object, Schema> {
      * Yup Validation
      */
     if (this._validationLib === 'yup') {
-      let yup;
-
-      try {
-        yup = await import('yup');
-      } catch (error) {
-        throw new Error(
-          'You have to install yup before using it as validator!'
-        );
-      }
-
-      if (this._validationSchema instanceof yup.ObjectSchema) {
+      if (this._validationSchema instanceof ObjectSchema) {
         try {
           await this._validationSchema.validate(this._values, {
             abortEarly: false,
@@ -173,7 +163,7 @@ export default class FormixStore<T extends object, Schema> {
             this.clearErrors();
           }
         } catch (error) {
-          if (error instanceof yup.ValidationError) {
+          if (error instanceof ValidationError) {
             this._fields.forEach((field) => {
               const innerError = (error as ValidationError).inner.find(
                 (err) => err.path === field
