@@ -70,6 +70,7 @@ export function set(
 ) {
   if (typeof path === 'string') path = stringToPath(path);
 
+  // TODO: improve types
   function createNewElement(
     object: Record<string, unknown>,
     path: PathParam,
