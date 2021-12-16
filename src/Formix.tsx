@@ -13,7 +13,9 @@ import { FormixProps, ValidationLib } from './types';
  * the form values. But you can use only one of them.
  * @param props - The props of the component.
  */
-export default function Formix<T extends object>(props: FormixProps<T>) {
+export default function Formix<T extends object, Schema extends object>(
+  props: FormixProps<T, Schema>
+) {
   const { initialValues, children, onSubmit, yupSchema, zodSchema } = props;
 
   if (yupSchema && zodSchema) {
@@ -32,7 +34,7 @@ export default function Formix<T extends object>(props: FormixProps<T>) {
         validationLib = 'zod';
       }
 
-      return new FormixStore<T>(
+      return new FormixStore<T, Schema>(
         initialValues,
         onSubmit,
         validationSchema,
@@ -42,8 +44,7 @@ export default function Formix<T extends object>(props: FormixProps<T>) {
     [] // eslint-disable-line
   );
 
-  // TODO: improve this type
-  function handleSubmit(event: any) {
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     formix.submitForm();

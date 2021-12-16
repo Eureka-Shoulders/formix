@@ -1,8 +1,7 @@
-import { createContext, useContext } from 'react';
+import { Context, createContext, useContext } from 'react';
 import FormixStore from './FormixStore';
 
-// TODO: improve types
-export const FormContext = createContext<FormixStore<any> | null>(null);
+export const FormContext = createContext({} as unknown);
 
 /**
  * A hook to access the FormixStore from a React component.
@@ -10,8 +9,8 @@ export const FormContext = createContext<FormixStore<any> | null>(null);
  * Only works if the component is a child of a Formix.
  * @returns A FormixStore instance
  */
-export function useFormixContext() {
-  const context = useContext(FormContext);
+export function useFormixContext<T extends object, Schema>() {
+  const context = useContext(FormContext as Context<FormixStore<T, Schema>>);
 
   if (!context)
     throw new Error(

@@ -6,12 +6,11 @@ import { useFormixContext } from './formixContext';
  * It provides a way to add and remove array fields.
  * @param name The name of the array field.
  */
-export default function useArrayField(name: string) {
+export default function useArrayField<T>(name: string) {
   const formix = useFormixContext();
-  const values = formix.getValue(name);
+  const values = formix.getValue<T[]>(name);
 
-  // TODO: improve this type
-  function push(item: any) {
+  function push(item: T) {
     formix.setFieldValue(name, [...values, item]);
   }
 

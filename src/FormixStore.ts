@@ -1,27 +1,28 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx';
-import { ValidationError } from 'yup';
-import { ZodError } from 'zod';
-import { MultiSchema, ValidationLib } from './types';
+import { FieldHelpers, FieldMeta, FieldProps } from '.';
+import { ValidationLib } from './types';
 import { get, set } from './utils';
+import { ZodError } from 'zod';
+import { ObjectSchema, ValidationError } from 'yup';
 
-export default class FormixStore<T extends object> {
+export default class FormixStore<T extends object, Schema> {
   private _isSubmitting = false;
   private _initialValues: T;
   private _values: T;
   private _errors: Partial<T> = {};
   private _toucheds: Partial<T> = {};
   private _fields: string[] = [];
-  private _validationSchema?: MultiSchema;
+  private _validationSchema?: Schema;
   private _validationLib?: ValidationLib;
   private _onSubmit: (values: T) => Promise<void> | void;
 
   constructor(
     initialValues: T,
     onSubmit: (values: T) => void,
-    validationSchema?: MultiSchema,
+    validationSchema?: Schema,
     validationLib?: ValidationLib
   ) {
-    makeAutoObservable<FormixStore<T>, '_onSubmit'>(
+    makeAutoObservable<FormixStore<T, Schema>, '_onSubmit'>(
       this,
       {
         _onSubmit: false,
@@ -40,13 +41,13 @@ export default class FormixStore<T extends object> {
     this._isSubmitting = bool;
   }
 
-  // TODO: improve types
-  private handleChange(event: React.ChangeEvent<any>) {
+  private handleChange<T extends HTMLInputElement>(
+    event: React.ChangeEvent<T>
+  ) {
     this.setFieldValue(event.target.name, event.target.value);
   }
 
-  // TODO: improve types
-  private handleBlur(event: React.FocusEvent<any>) {
+  private handleBlur<T extends HTMLInputElement>(event: React.FocusEvent<T>) {
     set(this._toucheds, event.target.name, true);
     this.validate();
   }
@@ -68,16 +69,17 @@ export default class FormixStore<T extends object> {
     this.validate();
   }
 
-  // TODO: improve types
-  setFieldValue(name: string, value: any) {
+  setFieldValue<Value>(name: string, value: Value) {
     set(this._values, name, value);
     this.validate();
   }
 
-  getFieldProps(name: string) {
+  getFieldProps<Value, Element extends HTMLInputElement>(
+    name: string
+  ): FieldProps<Value, Element> {
     const field = {
       name,
-      value: this.getValue(name),
+      value: this.getValue<Value>(name),
       onChange: this.handleChange,
       onBlur: this.handleBlur,
     };
@@ -85,10 +87,10 @@ export default class FormixStore<T extends object> {
     return field;
   }
 
-  getFieldMeta(name: string) {
+  getFieldMeta<Value>(name: string): FieldMeta<Value> {
     const meta = {
-      initialValue: this.getInitialValue(name),
-      value: this.getValue(name),
+      initialValue: this.getInitialValue<Value>(name),
+      value: this.getValue<Value>(name),
       error: this.getError(name),
       touched: this.getTouched(name),
     };
@@ -96,20 +98,19 @@ export default class FormixStore<T extends object> {
     return meta;
   }
 
-  getFieldHelpers(name: string) {
-    // TODO: improve types
+  getFieldHelpers<Value>(name: string): FieldHelpers<Value> {
     const helpers = {
-      setValue: (value: any) => this.setFieldValue(name, value),
+      setValue: (value: Value) => this.setFieldValue<Value>(name, value),
     };
 
     return helpers;
   }
 
-  getValue(name: string) {
+  getValue<Value>(name: string): Value {
     return get(this._values, name);
   }
 
-  getInitialValue(name: string) {
+  getInitialValue<Value>(name: string): Value {
     return get(this._initialValues, name);
   }
 
@@ -117,8 +118,8 @@ export default class FormixStore<T extends object> {
    * Errors
    */
 
-  getError(name: string) {
-    return get(this._errors, name) as string;
+  getError(name: string): string {
+    return get(this._errors, name);
   }
 
   setError(name: string, error: string | null) {
@@ -135,8 +136,8 @@ export default class FormixStore<T extends object> {
     });
   }
 
-  getTouched(name: string) {
-    return get(this._toucheds, name) as boolean;
+  getTouched(name: string): boolean {
+    return !!get(this._toucheds, name);
   }
 
   touchAll() {
@@ -152,17 +153,7 @@ export default class FormixStore<T extends object> {
      * Yup Validation
      */
     if (this._validationLib === 'yup') {
-      let yup;
-
-      try {
-        yup = await import('yup');
-      } catch (error) {
-        throw new Error(
-          'You have to install yup before using it as validator!'
-        );
-      }
-
-      if (this._validationSchema instanceof yup.ObjectSchema) {
+      if (this._validationSchema instanceof ObjectSchema) {
         try {
           await this._validationSchema.validate(this._values, {
             abortEarly: false,
@@ -172,7 +163,7 @@ export default class FormixStore<T extends object> {
             this.clearErrors();
           }
         } catch (error) {
-          if (error instanceof yup.ValidationError) {
+          if (error instanceof ValidationError) {
             this._fields.forEach((field) => {
               const innerError = (error as ValidationError).inner.find(
                 (err) => err.path === field
