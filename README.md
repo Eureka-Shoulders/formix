@@ -12,13 +12,13 @@ A Formik inspired form library that uses MobX under the hood and update only the
 Using npm:
 
 ```bash
-npm install @euk-labs/formix mobx
+npm install @euk-labs/formix mobx mobx-react-lite
 ```
 
 Using yarn:
 
 ```bash
-yarn add @euk-labs/formix mobx
+yarn add @euk-labs/formix mobx mobx-react-lite
 ```
 
 ## Example
@@ -27,6 +27,7 @@ yarn add @euk-labs/formix mobx
 
 ```tsx
 import { useField } from '@euk-labs/formix';
+import { observer } from 'mobx-react-lite'
 import { InputHTMLAttributes } from 'react';
 
 function TextField(
@@ -37,6 +38,8 @@ function TextField(
 
   return <input {...rest} {...field} />;
 }
+
+export default observer(TextField)
 ```
 
 ### Creating your first form
