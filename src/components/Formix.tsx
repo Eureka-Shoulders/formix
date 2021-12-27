@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
-import { FormContext } from './formixContext';
-import FormixStore from './FormixStore';
-import { FormixProps, ValidationLib } from './types';
+import { FormContext } from '../hooks/useFormixContext';
+import FormixStore from '../FormixStore';
+import { FormixProps, ValidationLib } from '../types';
 
 /**
  * A component that helps you with building forms. It provides a context that

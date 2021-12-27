@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
 import { InputHTMLAttributes } from 'react';
-import useField from './useField';
+import useField from '../hooks/useField';
 
 /**
  * A component that renders a input field connected to Formix context

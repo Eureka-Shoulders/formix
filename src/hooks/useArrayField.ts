@@ -1,4 +1,4 @@
-import { useFormixContext } from './formixContext';
+import useFormixContext from './useFormixContext';
 
 /**
  * A hook that helps you build array fields in your form.

@@ -1,8 +1,16 @@
 {
   "name": "@euk-labs/formix",
-  "version": "0.1.2",
-  "main": "lib/cjs/index.js",
-  "module": "lib/esm/index.js",
+  "version": "0.2.0",
+  "exports": {
+    ".": {
+      "require": "./lib/cjs/index.js",
+      "import": "./lib/esm/index.js"
+    },
+    "./*": {
+      "require": "./lib/cjs/*/index.js",
+      "import": "./lib/esm/*/index.js"
+    }
+  },
   "types": "lib/types/index.d.ts",
   "files": [
     "lib"
