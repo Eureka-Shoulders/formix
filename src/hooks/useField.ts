@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useFormixContext } from './formixContext';
+import useFormixContext from './useFormixContext';
 
 /**
  * A hook that helps you build custom fields in your form.

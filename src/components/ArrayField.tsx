@@ -1,6 +1,6 @@
 import { observer } from 'mobx-react-lite';
-import { ArrayHelpers } from './types';
-import useArrayField from './useArrayField';
+import { ArrayHelpers } from '../types';
+import useArrayField from '../hooks/useArrayField';
 
 interface ArrayFieldProps {
   name: string;
