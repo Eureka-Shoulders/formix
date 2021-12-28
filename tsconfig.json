@@ -19,7 +19,7 @@
 
     // Build Options
     "declaration": true,
-    "declarationDir": "./lib/types"
+    "declarationDir": "./lib"
   },
   "include": ["src/**/*.ts", "src/**/*.tsx", "lib/types/useFormixContext.ts"],
   "exclude": ["node_modules", "lib"]
