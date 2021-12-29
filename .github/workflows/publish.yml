@@ -26,7 +26,9 @@ jobs:
         run: npm run test --ci --coverage --maxWorkers=2
       
       - name: Generate build
-        run: npm run build
+        run: |
+          cd lib
+          npm publish --access public
       
       - name: Publish lib to NPM
         run: npm publish --access public
