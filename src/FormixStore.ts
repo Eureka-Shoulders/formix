@@ -1,6 +1,5 @@
 import { makeAutoObservable, runInAction, toJS } from 'mobx';
-import { FieldHelpers, FieldMeta, FieldProps } from '.';
-import { ValidationLib } from './types';
+import { ValidationLib, FieldHelpers, FieldMeta, FieldProps } from './types';
 import { get, set } from './utils';
 import { ZodError } from 'zod';
 import { ObjectSchema, ValidationError } from 'yup';
