@@ -26,11 +26,11 @@ jobs:
         run: npm run test --ci --coverage --maxWorkers=2
       
       - name: Generate build
+        run: npm run build
+          
+      - name: Publish lib to NPM
         run: |
           cd lib
           npm publish --access public
-      
-      - name: Publish lib to NPM
-        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
