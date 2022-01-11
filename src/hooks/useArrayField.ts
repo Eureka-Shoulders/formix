@@ -9,22 +9,10 @@ import useFormixContext from './useFormixContext';
 export default function useArrayField<T>(name: string) {
   const formix = useFormixContext();
   const values = formix.getValue<T[]>(name);
-
-  function push(item: T) {
-    formix.setFieldValue(name, [...values, item]);
-  }
-
-  function remove(index: number) {
-    const newArray = [...values];
-    newArray.splice(index, 1);
-    formix.setFieldValue(name, newArray);
-  }
+  const helpers = formix.getArrayHelpers<T>(name);
 
   return {
     values,
-    helpers: {
-      push,
-      remove,
-    },
+    helpers,
   };
 }
