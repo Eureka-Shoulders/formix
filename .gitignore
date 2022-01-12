@@ -4,3 +4,4 @@ node_modules
 .cache
 lib
 coverage
+.vscode
