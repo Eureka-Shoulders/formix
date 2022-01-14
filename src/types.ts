@@ -1,12 +1,5 @@
 import React from 'react';
 
-// TODO: discuss about the best way to handle this types
-export interface ArrayHelpers {
-  values: unknown[];
-  push(item: unknown): void;
-  remove(index: number): void;
-}
-
 export type PathParam = Array<string | number> | string;
 
 export interface FormixProps<T extends object, Schema extends object> {
@@ -35,4 +28,11 @@ export interface FieldMeta<T> {
 
 export interface FieldHelpers<T> {
   setValue(value: T): void;
+}
+
+// TODO: discuss about the best way to handle this types
+export interface ArrayHelpers {
+  values: unknown[];
+  push(item: unknown): void;
+  remove(index: number): void;
 }

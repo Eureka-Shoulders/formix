@@ -1,8 +1,15 @@
-import { makeAutoObservable, runInAction, toJS } from 'mobx';
+import {
+  makeAutoObservable,
+  runInAction,
+  toJS,
+  IObservableArray,
+  action,
+} from 'mobx';
 import { ValidationLib, FieldHelpers, FieldMeta, FieldProps } from './types';
 import { get, set } from './utils';
 import { ZodError } from 'zod';
 import { ObjectSchema, ValidationError } from 'yup';
+import { ArrayHelpers } from './types';
 
 export default class FormixStore<T extends object, Schema> {
   private _isSubmitting = false;
@@ -100,6 +107,25 @@ export default class FormixStore<T extends object, Schema> {
   getFieldHelpers<Value>(name: string): FieldHelpers<Value> {
     const helpers = {
       setValue: (value: Value) => this.setFieldValue<Value>(name, value),
+    };
+
+    return helpers;
+  }
+
+  getArrayHelpers<Value = unknown>(name: string): Omit<ArrayHelpers, 'values'> {
+    const push = action((value: Value) => {
+      const array = get(this._values, name) as IObservableArray<Value>;
+      array.push(value);
+    });
+
+    const remove = action((index: number) => {
+      const array = get(this._values, name) as IObservableArray<Value>;
+      array.spliceWithArray(index, 1);
+    });
+
+    const helpers = {
+      push,
+      remove,
     };
 
     return helpers;
