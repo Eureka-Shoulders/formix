@@ -1,6 +1,6 @@
 {
   "name": "@euk-labs/formix",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "main": "./cjs/index.js",
   "module": "./index.js",
   "types": "./index.d.ts",
