@@ -116,11 +116,13 @@ export default class FormixStore<T extends object, Schema> {
     const push = action((value: Value) => {
       const array = get(this._values, name) as IObservableArray<Value>;
       array.push(value);
+      this.validate();
     });
 
     const remove = action((index: number) => {
       const array = get(this._values, name) as IObservableArray<Value>;
       array.spliceWithArray(index, 1);
+      this.validate();
     });
 
     const helpers = {

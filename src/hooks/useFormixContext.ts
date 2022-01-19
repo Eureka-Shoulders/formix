@@ -1,7 +1,6 @@
-import { Context, createContext, useContext } from 'react';
+import FormContext from '../context';
+import { Context, useContext } from 'react';
 import FormixStore from '../FormixStore';
-
-export const FormContext = createContext({} as unknown);
 
 /**
  * A hook to access the FormixStore from a React component.
