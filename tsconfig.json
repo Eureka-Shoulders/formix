@@ -19,10 +19,9 @@
     "skipLibCheck": true,
     "types": ["jest"],
 
-    // Build Options
     "declaration": true,
-    "declarationDir": "./lib"
+    "declarationDir": "lib"
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "lib/types/useFormixContext.ts"],
+  "include": ["src/**/*.ts", "src/**/*.tsx"],
   "exclude": ["node_modules", "lib"]
 }
