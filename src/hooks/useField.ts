@@ -13,6 +13,10 @@ export default function useField<
 >(name: string) {
   const formix = useFormixContext();
 
+  if (!formix) {
+    throw new Error('useField must be used within a Formix component');
+  }
+
   useEffect(() => {
     formix.registerField(name);
   }, []);
