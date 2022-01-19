@@ -1,5 +1,5 @@
+import FormContext from '../context';
 import { useMemo } from 'react';
-import { FormContext } from '../hooks/useFormixContext';
 import FormixStore from '../FormixStore';
 import { FormixProps, ValidationLib } from '../types';
 
