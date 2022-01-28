@@ -68,6 +68,11 @@ export default class FormixStore<T extends object, Schema> {
     this.setIsSubmitting(false);
   }
 
+  resetForm() {
+    this._values = toJS(this._initialValues);
+    this.clearErrors();
+  }
+
   registerField(name: string) {
     set(this._errors, name, null);
     set(this._toucheds, name, false);
