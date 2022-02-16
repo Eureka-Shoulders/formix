@@ -12,11 +12,11 @@ export interface FormixProps<T extends object, Schema extends object> {
 
 export type ValidationLib = 'yup' | 'zod';
 
-export interface FieldProps<T, Element> {
+export interface FieldProps<T> {
   name: string;
   value: T;
-  onChange(event: React.ChangeEvent<Element>): void;
-  onBlur(event: React.FocusEvent<Element>): void;
+  onChange(event: React.ChangeEvent): void;
+  onBlur(event: React.FocusEvent): void;
 }
 
 export interface FieldMeta<T> {
