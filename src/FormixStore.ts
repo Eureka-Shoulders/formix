@@ -47,13 +47,11 @@ export default class FormixStore<T extends object, Schema> {
     this._isSubmitting = bool;
   }
 
-  private handleChange<T extends HTMLInputElement>(
-    event: React.ChangeEvent<T>
-  ) {
+  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setFieldValue(event.target.name, event.target.value);
   }
 
-  private handleBlur<T extends HTMLInputElement>(event: React.FocusEvent<T>) {
+  private handleBlur(event: React.FocusEvent<HTMLInputElement>) {
     set(this._toucheds, event.target.name, true);
     this.validate();
   }
@@ -85,9 +83,7 @@ export default class FormixStore<T extends object, Schema> {
     this.validate();
   }
 
-  getFieldProps<Value, Element extends HTMLInputElement>(
-    name: string
-  ): FieldProps<Value, Element> {
+  getFieldProps<Value>(name: string): FieldProps<Value> {
     const field = {
       name,
       value: this.getValue<Value>(name),
