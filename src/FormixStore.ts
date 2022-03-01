@@ -20,6 +20,7 @@ export default class FormixStore<T extends object, Schema> {
   private _fields: string[] = [];
   private _validationSchema?: Schema;
   private _validationLib?: ValidationLib;
+  private _validateTimeout?: number;
   private _onSubmit: (values: T) => Promise<void> | void;
 
   constructor(
@@ -53,7 +54,7 @@ export default class FormixStore<T extends object, Schema> {
 
   private handleBlur(event: React.FocusEvent<HTMLInputElement>) {
     set(this._toucheds, event.target.name, true);
-    this.validate();
+    this.enqueueValidation();
   }
 
   async submitForm() {
@@ -75,12 +76,12 @@ export default class FormixStore<T extends object, Schema> {
     set(this._errors, name, null);
     set(this._toucheds, name, false);
     this._fields.push(name);
-    this.validate();
+    this.enqueueValidation();
   }
 
   setFieldValue<Value>(name: string, value: Value) {
     set(this._values, name, value);
-    this.validate();
+    this.enqueueValidation();
   }
 
   getFieldProps<Value>(name: string): FieldProps<Value> {
@@ -117,13 +118,13 @@ export default class FormixStore<T extends object, Schema> {
     const push = action((value: Value) => {
       const array = get(this._values, name) as IObservableArray<Value>;
       array.push(value);
-      this.validate();
+      this.enqueueValidation();
     });
 
     const remove = action((index: number) => {
       const array = get(this._values, name) as IObservableArray<Value>;
       array.spliceWithArray(index, 1);
-      this.validate();
+      this.enqueueValidation();
     });
 
     const helpers = {
@@ -176,6 +177,10 @@ export default class FormixStore<T extends object, Schema> {
 
   async validate() {
     if (!this._validationSchema) return;
+
+    clearTimeout(this._validateTimeout);
+
+    console.log('validating...');
 
     /**
      * Yup Validation
@@ -249,6 +254,13 @@ export default class FormixStore<T extends object, Schema> {
         );
       }
     }
+  }
+
+  enqueueValidation() {
+    clearTimeout(this._validateTimeout);
+    this._validateTimeout = setTimeout(() => {
+      this.validate();
+    }, 700);
   }
 
   get initialValues() {
