@@ -79,6 +79,7 @@ describe('Utils', () => {
   });
 
   it('should set elements of undefined indexes', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const obj: any = {
       a: [1],
     };

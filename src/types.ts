@@ -2,15 +2,17 @@ import React from 'react';
 
 export type PathParam = Array<string | number> | string;
 
-export interface FormixProps<T extends object, Schema extends object> {
-  initialValues: T;
-  children: React.ReactNode;
-  yupSchema?: Schema;
-  zodSchema?: Schema;
-  onSubmit(values: T): Promise<void> | void;
+export interface GenericError {
+  message: string;
+  path: PathParam;
 }
 
-export type ValidationLib = 'yup' | 'zod';
+export interface FormixProps<T extends object> {
+  initialValues: T;
+  children: React.ReactNode;
+  onSubmit(values: T): Promise<void> | void;
+  validate?: (values: T) => Promise<GenericError[]> | GenericError[];
+}
 
 export interface FieldProps<T> {
   name: string;

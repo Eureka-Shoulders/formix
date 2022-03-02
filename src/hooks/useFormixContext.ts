@@ -8,8 +8,8 @@ import FormixStore from '../FormixStore';
  * Only works if the component is a child of a Formix.
  * @returns A FormixStore instance
  */
-export default function useFormixContext<T extends object, Schema>() {
-  const context = useContext(FormContext as Context<FormixStore<T, Schema>>);
+export default function useFormixContext<T extends object>() {
+  const context = useContext(FormContext as Context<FormixStore<T>>);
 
   if (!context)
     throw new Error(
