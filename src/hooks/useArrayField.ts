@@ -13,7 +13,7 @@ export default function useArrayField<T>(name: string) {
     throw new Error('useField must be used within a Formix component');
   }
 
-  const values = formix.getValue<T[]>(name);
+  const values = formix.values[name] as T[];
   const helpers = formix.getArrayHelpers<T>(name);
 
   return {

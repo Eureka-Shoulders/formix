@@ -5,23 +5,25 @@ import {
   IObservableArray,
   action,
 } from 'mobx';
-import { ValidationLib, FieldHelpers, FieldMeta, FieldProps } from './types';
-import { get, set } from './utils';
+import { ValidationLib } from './types';
+import { get } from './utils';
 import { ZodError } from 'zod';
 import { ObjectSchema, ValidationError } from 'yup';
 import { ArrayHelpers } from './types';
+import FieldStore from './FieldStore';
 
-export default class FormixStore<T extends object, Schema> {
+// TODO: disabled status on meta
+// TODO: setDisabled(field, boolean)
+export default class FormixStore<T extends Record<string, unknown>, Schema> {
   private _isSubmitting = false;
   private _initialValues: T;
   private _values: T;
-  private _errors: Partial<T> = {};
-  private _toucheds: Partial<T> = {};
-  private _fields: string[] = [];
   private _validationSchema?: Schema;
   private _validationLib?: ValidationLib;
   private _validateTimeout?: number;
   private _onSubmit: (values: T) => Promise<void> | void;
+
+  private _fields: Map<string, FieldStore<unknown>> = new Map();
 
   constructor(
     initialValues: T,
@@ -48,70 +50,77 @@ export default class FormixStore<T extends object, Schema> {
     this._isSubmitting = bool;
   }
 
-  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setFieldValue(event.target.name, event.target.value);
-  }
-
-  private handleBlur(event: React.FocusEvent<HTMLInputElement>) {
-    set(this._toucheds, event.target.name, true);
-    this.enqueueValidation();
-  }
-
   async submitForm() {
     this.setIsSubmitting(true);
     this.touchAll();
     await this.validate();
 
-    if (this.isValid) await this._onSubmit(this.values);
+    if (this.isValid) {
+      await this._onSubmit(this.values);
+    }
 
     this.setIsSubmitting(false);
   }
 
   resetForm() {
-    this._values = toJS(this._initialValues);
+    this._fields.forEach((field) => {
+      field.resetField();
+    });
     this.clearErrors();
   }
 
-  registerField(name: string) {
-    set(this._errors, name, null);
-    set(this._toucheds, name, false);
-    this._fields.push(name);
-    this.enqueueValidation();
-  }
+  registerField<Value>(name: string) {
+    const initialValue = this.getInitialValue<Value>(name);
+    const field = new FieldStore<Value>(
+      { name, initialValue },
+      this.enqueueValidation
+    );
 
-  setFieldValue<Value>(name: string, value: Value) {
-    set(this._values, name, value);
+    this._fields.set(name, field);
     this.enqueueValidation();
-  }
-
-  getFieldProps<Value>(name: string): FieldProps<Value> {
-    const field = {
-      name,
-      value: this.getValue<Value>(name),
-      onChange: this.handleChange,
-      onBlur: this.handleBlur,
-    };
 
     return field;
   }
 
-  getFieldMeta<Value>(name: string): FieldMeta<Value> {
-    const meta = {
-      initialValue: this.getInitialValue<Value>(name),
-      value: this.getValue<Value>(name),
-      error: this.getError(name),
-      touched: this.getTouched(name),
-    };
+  setFieldValue<Value>(name: string, value: Value) {
+    const field = this._fields.get(name);
 
-    return meta;
+    if (!field) {
+      return console.warn(`Field ${name} does not exist`);
+    }
+
+    field.setValue(value);
+    this.enqueueValidation();
   }
 
-  getFieldHelpers<Value>(name: string): FieldHelpers<Value> {
-    const helpers = {
-      setValue: (value: Value) => this.setFieldValue<Value>(name, value),
-    };
+  getFieldProps(name: string) {
+    const field = this._fields.get(name);
 
-    return helpers;
+    if (!field) {
+      return console.error(`Field ${name} does not exist`);
+    }
+
+    return field.fieldProps;
+  }
+
+  getFieldMeta(name: string) {
+    const field = this._fields.get(name);
+
+    if (!field) {
+      return console.error(`Field ${name} does not exist`);
+    }
+
+    return field.fieldMeta;
+  }
+
+  getFieldHelpers(name: string) {
+    const field = this._fields.get(name);
+
+    if (!field) {
+      return console.error(`Field ${name} does not exist`);
+    }
+
+    return field.fieldHelpers;
   }
 
   getArrayHelpers<Value = unknown>(name: string): Omit<ArrayHelpers, 'values'> {
@@ -135,10 +144,6 @@ export default class FormixStore<T extends object, Schema> {
     return helpers;
   }
 
-  getValue<Value>(name: string): Value {
-    return get(this._values, name);
-  }
-
   getInitialValue<Value>(name: string): Value {
     return get(this._initialValues, name);
   }
@@ -147,31 +152,17 @@ export default class FormixStore<T extends object, Schema> {
    * Errors
    */
 
-  getError(name: string): string {
-    return get(this._errors, name);
-  }
-
-  setError(name: string, error: string | null) {
-    if (this.getError(name) === undefined) return;
-
-    return set(this._errors, name, error);
-  }
-
   clearErrors() {
     this._fields.forEach((field) => {
-      if (this.getError(field)) {
-        this.setError(field, null);
+      if (field.error) {
+        field.setError(null);
       }
     });
   }
 
-  getTouched(name: string): boolean {
-    return !!get(this._toucheds, name);
-  }
-
   touchAll() {
     this._fields.forEach((field) => {
-      set(this._toucheds, field, true);
+      field.setTouched(true);
     });
   }
 
@@ -199,14 +190,14 @@ export default class FormixStore<T extends object, Schema> {
           if (error instanceof ValidationError) {
             this._fields.forEach((field) => {
               const innerError = (error as ValidationError).inner.find(
-                (err) => err.path === field
+                (err) => err.path === field.name
               );
 
               runInAction(() => {
                 if (innerError) {
-                  this.setError(field, innerError.message);
+                  field.setError(innerError.message);
                 } else {
-                  this.setError(field, null);
+                  field.setError(null);
                 }
               });
             });
@@ -234,14 +225,14 @@ export default class FormixStore<T extends object, Schema> {
             if (error instanceof zod.ZodError) {
               this._fields.forEach((field) => {
                 const innerError = (error as ZodError).errors.find(
-                  (err) => err.path.join('.') === field
+                  (err) => err.path.join('.') === field.name
                 );
 
                 runInAction(() => {
                   if (innerError) {
-                    this.setError(field, innerError.message);
+                    field.setError(innerError.message);
                   } else {
-                    this.setError(field, null);
+                    field.setError(null);
                   }
                 });
               });
@@ -279,7 +270,7 @@ export default class FormixStore<T extends object, Schema> {
     let isValid = true;
 
     this._fields.forEach((field) => {
-      if (this.getError(field) !== null) {
+      if (field.error !== null) {
         isValid = false;
       }
     });

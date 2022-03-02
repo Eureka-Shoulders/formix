@@ -13,9 +13,10 @@ import { FormixProps, ValidationLib } from '../types';
  * the form values. But you can use only one of them.
  * @param props - The props of the component.
  */
-export default function Formix<T extends object, Schema extends object>(
-  props: FormixProps<T, Schema>
-) {
+export default function Formix<
+  T extends Record<string, unknown>,
+  Schema extends object
+>(props: FormixProps<T, Schema>) {
   const { initialValues, children, onSubmit, yupSchema, zodSchema } = props;
 
   if (yupSchema && zodSchema) {

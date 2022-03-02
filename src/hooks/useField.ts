@@ -1,4 +1,5 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import FieldStore from '../FieldStore';
 import useFormixContext from './useFormixContext';
 
 /**
@@ -9,18 +10,19 @@ import useFormixContext from './useFormixContext';
  */
 export default function useField<T>(name: string) {
   const formix = useFormixContext();
+  const [field, setField] = useState<FieldStore<T> | null>(null);
 
   if (!formix) {
     throw new Error('useField must be used within a Formix component');
   }
 
   useEffect(() => {
-    formix.registerField(name);
+    setField(formix.registerField(name));
   }, []);
 
   return {
-    field: formix.getFieldProps<T>(name),
-    meta: formix.getFieldMeta(name),
-    helpers: formix.getFieldHelpers(name),
+    field: field?.fieldProps,
+    meta: field?.fieldMeta,
+    helpers: field?.fieldHelpers,
   };
 }
