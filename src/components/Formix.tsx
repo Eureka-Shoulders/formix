@@ -1,7 +1,7 @@
 import FormContext from '../context';
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import FormixStore from '../FormixStore';
-import { FormixProps, ValidationLib } from '../types';
+import { FormixProps } from '../types';
 
 /**
  * A component that helps you with building forms. It provides a context that
@@ -9,44 +9,19 @@ import { FormixProps, ValidationLib } from '../types';
  * It receives the initial values to build the form and the onSubmit function to
  * handle the form submission.
  *
- * As optional parameter, you can pass a yup schema or a zod schema to validate
- * the form values. But you can use only one of them.
+ * As optional parameter, you can pass a validate function that returns an array of errors.
  * @param props - The props of the component.
  */
-export default function Formix<T extends object, Schema extends object>(
-  props: FormixProps<T, Schema>
-) {
-  const { initialValues, children, onSubmit, yupSchema, zodSchema } = props;
+export default function Formix<T extends object>(props: FormixProps<T>) {
+  const { initialValues, children, onSubmit, validate } = props;
+  const [formix] = useState(() => new FormixStore<T>(initialValues, onSubmit));
 
-  if (yupSchema && zodSchema) {
-    throw new Error('You can only use one schema at a time');
-  }
-
-  const formix = useMemo(
-    () => {
-      const validationSchema = yupSchema || zodSchema;
-      let validationLib: ValidationLib | undefined = undefined;
-
-      if (yupSchema) {
-        validationLib = 'yup';
-      }
-      if (zodSchema) {
-        validationLib = 'zod';
-      }
-
-      return new FormixStore<T, Schema>(
-        initialValues,
-        onSubmit,
-        validationSchema,
-        validationLib
-      );
-    },
-    [] // eslint-disable-line
-  );
+  useEffect(() => {
+    formix.setValidateFunc(validate);
+  }, [validate]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-
     formix.submitForm();
   }
 

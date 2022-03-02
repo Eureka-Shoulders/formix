@@ -1,35 +1,29 @@
+import { makeAutoObservable, toJS, IObservableArray, action, flow } from 'mobx';
 import {
-  makeAutoObservable,
-  runInAction,
-  toJS,
-  IObservableArray,
-  action,
-} from 'mobx';
-import { ValidationLib, FieldHelpers, FieldMeta, FieldProps } from './types';
+  FieldHelpers,
+  FieldMeta,
+  FieldProps,
+  ArrayHelpers,
+  FormixProps,
+  GenericError,
+} from './types';
 import { get, set } from './utils';
-import { ZodError } from 'zod';
-import { ObjectSchema, ValidationError } from 'yup';
-import { ArrayHelpers } from './types';
 
-export default class FormixStore<T extends object, Schema> {
+const VALIDATION_TIMEOUT = 300;
+
+export default class FormixStore<T extends object> {
   private _isSubmitting = false;
   private _initialValues: T;
   private _values: T;
   private _errors: Partial<T> = {};
   private _toucheds: Partial<T> = {};
   private _fields: string[] = [];
-  private _validationSchema?: Schema;
-  private _validationLib?: ValidationLib;
+  private _validateFunc: FormixProps<T>['validate'];
   private _validateTimeout?: number;
   private _onSubmit: (values: T) => Promise<void> | void;
 
-  constructor(
-    initialValues: T,
-    onSubmit: (values: T) => void,
-    validationSchema?: Schema,
-    validationLib?: ValidationLib
-  ) {
-    makeAutoObservable<FormixStore<T, Schema>, '_onSubmit'>(
+  constructor(initialValues: T, onSubmit: (values: T) => void) {
+    makeAutoObservable<FormixStore<T>, '_onSubmit'>(
       this,
       {
         _onSubmit: false,
@@ -40,8 +34,11 @@ export default class FormixStore<T extends object, Schema> {
     this._initialValues = initialValues;
     this._values = initialValues;
     this._onSubmit = onSubmit;
-    this._validationSchema = validationSchema;
-    this._validationLib = validationLib;
+  }
+
+  setValidateFunc(validateFunc: FormixProps<T>['validate']) {
+    this._validateFunc = validateFunc;
+    this.enqueueValidation();
   }
 
   setIsSubmitting(bool: boolean) {
@@ -175,92 +172,36 @@ export default class FormixStore<T extends object, Schema> {
     });
   }
 
-  async validate() {
-    if (!this._validationSchema) return;
+  validate = flow(function* (this: FormixStore<T>) {
+    if (!this._validateFunc) return;
 
     clearTimeout(this._validateTimeout);
 
-    console.log('validating...');
+    const errors: GenericError[] = yield this._validateFunc(this.values);
 
-    /**
-     * Yup Validation
-     */
-    if (this._validationLib === 'yup') {
-      if (this._validationSchema instanceof ObjectSchema) {
-        try {
-          await this._validationSchema.validate(this._values, {
-            abortEarly: false,
-          });
-
-          if (!this.isValid) {
-            this.clearErrors();
-          }
-        } catch (error) {
-          if (error instanceof ValidationError) {
-            this._fields.forEach((field) => {
-              const innerError = (error as ValidationError).inner.find(
-                (err) => err.path === field
-              );
-
-              runInAction(() => {
-                if (innerError) {
-                  this.setError(field, innerError.message);
-                } else {
-                  this.setError(field, null);
-                }
-              });
-            });
-          }
-        }
-      }
+    if (!errors.length && !this.isValid) {
+      return this.clearErrors();
     }
 
-    /**
-     * Zod Validation
-     */
-    if (this._validationLib === 'zod') {
-      let zod;
+    this.clearErrors();
+    errors.forEach((error) => {
+      let path = '';
 
-      try {
-        zod = await import('zod');
-
-        if (this._validationSchema instanceof zod.ZodType) {
-          try {
-            this._validationSchema.parse(toJS(this._values));
-            if (!this.isValid) {
-              this.clearErrors();
-            }
-          } catch (error) {
-            if (error instanceof zod.ZodError) {
-              this._fields.forEach((field) => {
-                const innerError = (error as ZodError).errors.find(
-                  (err) => err.path.join('.') === field
-                );
-
-                runInAction(() => {
-                  if (innerError) {
-                    this.setError(field, innerError.message);
-                  } else {
-                    this.setError(field, null);
-                  }
-                });
-              });
-            }
-          }
-        }
-      } catch (error) {
-        throw new Error(
-          'You have to install zod before using it as validator!'
-        );
+      if (Array.isArray(error.path)) {
+        path = error.path.join('.');
+      } else {
+        path = error.path;
       }
-    }
-  }
+
+      this.setError(path, error.message);
+    });
+  });
 
   enqueueValidation() {
     clearTimeout(this._validateTimeout);
     this._validateTimeout = setTimeout(() => {
       this.validate();
-    }, 700);
+    }, VALIDATION_TIMEOUT);
   }
 
   get initialValues() {
@@ -276,14 +217,6 @@ export default class FormixStore<T extends object, Schema> {
   }
 
   get isValid() {
-    let isValid = true;
-
-    this._fields.forEach((field) => {
-      if (this.getError(field) !== null) {
-        isValid = false;
-      }
-    });
-
-    return isValid;
+    return this._fields.every((field) => this.getError(field) === null);
   }
 }

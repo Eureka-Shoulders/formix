@@ -79,7 +79,7 @@ describe('Utils', () => {
   });
 
   it('should set elements of undefined indexes', () => {
-    const obj: any = {
+    const obj: Record<string, unknown> = {
       a: [1],
     };
 
