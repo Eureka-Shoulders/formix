@@ -79,7 +79,8 @@ describe('Utils', () => {
   });
 
   it('should set elements of undefined indexes', () => {
-    const obj: Record<string, unknown> = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const obj: any = {
       a: [1],
     };
 
