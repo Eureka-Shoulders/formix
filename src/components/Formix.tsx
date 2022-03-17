@@ -1,5 +1,5 @@
 import FormContext from '../context';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import FormixStore from '../FormixStore';
 import { FormixProps } from '../types';
 
@@ -13,17 +13,31 @@ import { FormixProps } from '../types';
  * @param props - The props of the component.
  */
 export default function Formix<T extends object>(props: FormixProps<T>) {
-  const { initialValues, children, onSubmit, validate } = props;
+  const { initialValues, enableReinitialize, children, onSubmit, validate } =
+    props;
   const [formix] = useState(() => new FormixStore<T>(initialValues, onSubmit));
-
-  useEffect(() => {
-    formix.setValidateFunc(validate);
-  }, [validate]);
+  const isFirstMount = useRef(true);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     formix.submitForm();
   }
+
+  useEffect(() => {
+    formix.setValidateFunc(validate);
+  }, [validate]);
+
+  useEffect(() => {
+    if (isFirstMount.current) {
+      isFirstMount.current = false;
+      return;
+    }
+
+    if (enableReinitialize) {
+      formix.setInitialValues(initialValues);
+      formix.setOnSubmitFunc(onSubmit);
+    }
+  }, [initialValues, onSubmit]);
 
   return (
     <FormContext.Provider value={formix}>
