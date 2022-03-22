@@ -28,10 +28,12 @@ export interface FieldMeta<T> {
   value: T;
   error: string | null;
   touched: boolean;
+  disabled: boolean;
 }
 
 export interface FieldHelpers<T> {
   setValue(value: T): void;
+  setDisabled(disabled: boolean): void;
 }
 
 // TODO: discuss about the best way to handle this types
