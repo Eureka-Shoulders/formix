@@ -9,6 +9,7 @@ export interface GenericError {
 
 export interface FormixProps<T extends object> {
   initialValues: T;
+  enableReinitialize?: boolean;
   children: React.ReactNode;
   onSubmit(values: T): Promise<void> | void;
   validate?: (values: T) => Promise<GenericError[]> | GenericError[];

@@ -37,6 +37,10 @@ export default class FormixStore<T extends object> {
     this._onSubmit = onSubmit;
   }
 
+  setOnSubmitFunc(onSubmitFunc: FormixProps<T>['onSubmit']) {
+    this._onSubmit = onSubmitFunc;
+  }
+
   setValidateFunc(validateFunc: FormixProps<T>['validate']) {
     this._validateFunc = validateFunc;
     this.enqueueValidation();
@@ -44,6 +48,11 @@ export default class FormixStore<T extends object> {
 
   setIsSubmitting(bool: boolean) {
     this._isSubmitting = bool;
+  }
+
+  setInitialValues(initialValues: T) {
+    this._initialValues = initialValues;
+    this.resetForm();
   }
 
   private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -68,6 +77,7 @@ export default class FormixStore<T extends object> {
   resetForm() {
     this._values = toJS(this._initialValues);
     this.clearErrors();
+    this.untouchAll();
   }
 
   registerField(name: string) {
@@ -176,6 +186,12 @@ export default class FormixStore<T extends object> {
 
   getDisabled(name: string): boolean {
     return !!get(this._disableds, name);
+  }
+
+  untouchAll() {
+    this._fields.forEach((field) => {
+      set(this._toucheds, field, false);
+    });
   }
 
   touchAll() {
