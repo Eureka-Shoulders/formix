@@ -9,8 +9,6 @@ import {
 } from './types';
 import { get, set } from './utils';
 
-const VALIDATION_TIMEOUT = 300;
-
 export default class FormixStore<T extends object> {
   private _isSubmitting = false;
   private _initialValues: T;
@@ -20,6 +18,7 @@ export default class FormixStore<T extends object> {
   private _fields: string[] = [];
   private _validateFunc: FormixProps<T>['validate'];
   private _validateTimeout?: number;
+  private _validationDebounce?: number;
   private _onSubmit: (values: T) => Promise<void> | void;
 
   constructor(initialValues: T, onSubmit: (values: T) => void) {
@@ -34,6 +33,10 @@ export default class FormixStore<T extends object> {
     this._initialValues = initialValues;
     this._values = initialValues;
     this._onSubmit = onSubmit;
+  }
+
+  setValidationDebounce(debounce: number) {
+    this._validationDebounce = debounce;
   }
 
   setOnSubmitFunc(onSubmitFunc: FormixProps<T>['onSubmit']) {
@@ -217,7 +220,7 @@ export default class FormixStore<T extends object> {
     clearTimeout(this._validateTimeout);
     this._validateTimeout = setTimeout(() => {
       this.validate();
-    }, VALIDATION_TIMEOUT);
+    }, this._validationDebounce);
   }
 
   get initialValues() {

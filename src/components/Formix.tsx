@@ -13,8 +13,14 @@ import { FormixProps } from '../types';
  * @param props - The props of the component.
  */
 export default function Formix<T extends object>(props: FormixProps<T>) {
-  const { initialValues, enableReinitialize, children, onSubmit, validate } =
-    props;
+  const {
+    initialValues,
+    enableReinitialize,
+    validationDebounce,
+    children,
+    onSubmit,
+    validate,
+  } = props;
   const [formix] = useState(() => new FormixStore<T>(initialValues, onSubmit));
   const isFirstMount = useRef(true);
 
@@ -25,7 +31,8 @@ export default function Formix<T extends object>(props: FormixProps<T>) {
 
   useEffect(() => {
     formix.setValidateFunc(validate);
-  }, [validate]);
+    formix.setValidationDebounce(validationDebounce || 0);
+  }, [validate, validationDebounce]);
 
   useEffect(() => {
     if (isFirstMount.current) {
