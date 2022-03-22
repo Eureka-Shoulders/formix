@@ -13,6 +13,7 @@ export interface FormixProps<T extends object> {
   children: React.ReactNode;
   onSubmit(values: T): Promise<void> | void;
   validate?: (values: T) => Promise<GenericError[]> | GenericError[];
+  validationDebounce?: number;
 }
 
 export interface FieldProps<T> {

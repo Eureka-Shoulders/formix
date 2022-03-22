@@ -9,17 +9,17 @@ import {
 } from './types';
 import { get, set } from './utils';
 
-const VALIDATION_TIMEOUT = 300;
-
 export default class FormixStore<T extends object> {
   private _isSubmitting = false;
   private _initialValues: T;
   private _values: T;
   private _errors: Partial<T> = {};
   private _toucheds: Partial<T> = {};
+  private _disableds: Partial<T> = {};
   private _fields: string[] = [];
   private _validateFunc: FormixProps<T>['validate'];
   private _validateTimeout?: number;
+  private _validationDebounce?: number;
   private _onSubmit: (values: T) => Promise<void> | void;
 
   constructor(initialValues: T, onSubmit: (values: T) => void) {
@@ -34,6 +34,10 @@ export default class FormixStore<T extends object> {
     this._initialValues = initialValues;
     this._values = initialValues;
     this._onSubmit = onSubmit;
+  }
+
+  setValidationDebounce(debounce: number) {
+    this._validationDebounce = debounce;
   }
 
   setOnSubmitFunc(onSubmitFunc: FormixProps<T>['onSubmit']) {
@@ -82,6 +86,7 @@ export default class FormixStore<T extends object> {
   registerField(name: string) {
     set(this._errors, name, null);
     set(this._toucheds, name, false);
+    set(this._disableds, name, false);
     this._fields.push(name);
     this.enqueueValidation();
   }
@@ -89,6 +94,10 @@ export default class FormixStore<T extends object> {
   setFieldValue<Value>(name: string, value: Value) {
     set(this._values, name, value);
     this.enqueueValidation();
+  }
+
+  setFieldDisabled(name: string, disabled: boolean) {
+    set(this._disableds, name, disabled);
   }
 
   getFieldProps<Value>(name: string): FieldProps<Value> {
@@ -108,6 +117,7 @@ export default class FormixStore<T extends object> {
       value: this.getValue<Value>(name),
       error: this.getError(name),
       touched: this.getTouched(name),
+      disabled: this.getDisabled(name),
     };
 
     return meta;
@@ -116,6 +126,7 @@ export default class FormixStore<T extends object> {
   getFieldHelpers<Value>(name: string): FieldHelpers<Value> {
     const helpers = {
       setValue: (value: Value) => this.setFieldValue<Value>(name, value),
+      setDisabled: (disabled: boolean) => this.setFieldDisabled(name, disabled),
     };
 
     return helpers;
@@ -176,6 +187,10 @@ export default class FormixStore<T extends object> {
     return !!get(this._toucheds, name);
   }
 
+  getDisabled(name: string): boolean {
+    return !!get(this._disableds, name);
+  }
+
   untouchAll() {
     this._fields.forEach((field) => {
       set(this._toucheds, field, false);
@@ -217,7 +232,7 @@ export default class FormixStore<T extends object> {
     clearTimeout(this._validateTimeout);
     this._validateTimeout = setTimeout(() => {
       this.validate();
-    }, VALIDATION_TIMEOUT);
+    }, this._validationDebounce);
   }
 
   get initialValues() {
