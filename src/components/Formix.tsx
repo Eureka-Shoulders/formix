@@ -40,9 +40,10 @@ export default function Formix<T extends object>(props: FormixProps<T>) {
       return;
     }
 
+    formix.setOnSubmitFunc(onSubmit);
+
     if (enableReinitialize) {
       formix.setInitialValues(initialValues);
-      formix.setOnSubmitFunc(onSubmit);
     }
   }, [initialValues, onSubmit]);
 
