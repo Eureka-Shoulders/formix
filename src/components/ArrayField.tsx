@@ -1,6 +1,12 @@
 import { observer } from 'mobx-react-lite';
-import { ArrayHelpers } from '../types';
 import useArrayField from '../hooks/useArrayField';
+
+// TODO: discuss about the best way to handle this types
+export interface ArrayHelpers {
+  values: unknown[];
+  push(item: unknown): void;
+  remove(index: number): void;
+}
 
 interface ArrayFieldProps {
   name: string;

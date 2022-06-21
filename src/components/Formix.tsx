@@ -1,7 +1,15 @@
 import FormContext from '../context';
 import { useEffect, useRef, useState } from 'react';
-import FormixStore from '../FormixStore';
-import { FormixProps } from '../types';
+import FormixStore, { GenericError } from '../FormixStore';
+
+export interface FormixProps<T extends object> {
+  initialValues: T;
+  enableReinitialize?: boolean;
+  children: React.ReactNode;
+  onSubmit(values: T): Promise<void> | void;
+  validate?: (values: T) => Promise<GenericError[]> | GenericError[];
+  validationDebounce?: number;
+}
 
 /**
  * A component that helps you with building forms. It provides a context that

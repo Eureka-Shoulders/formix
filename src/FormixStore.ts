@@ -1,13 +1,32 @@
 import { makeAutoObservable, toJS, IObservableArray, action, flow } from 'mobx';
-import {
-  FieldHelpers,
-  FieldMeta,
-  FieldProps,
-  ArrayHelpers,
-  FormixProps,
-  GenericError,
-} from './types';
-import { get, set } from './utils';
+import { ArrayHelpers } from './components/ArrayField';
+import { FormixProps } from './components/Formix';
+import { get, PathParam, set } from './utils';
+
+export interface GenericError {
+  message: string;
+  path: PathParam;
+}
+
+export interface FieldMeta<T> {
+  initialValue: T;
+  value: T;
+  error: string | null;
+  touched: boolean;
+  disabled: boolean;
+}
+
+export interface FieldHelpers<T> {
+  setValue(value: T): void;
+  setDisabled(disabled: boolean): void;
+}
+
+export interface FieldProps<T> {
+  name: string;
+  value: T;
+  onChange(event: React.ChangeEvent): void;
+  onBlur(event: React.FocusEvent): void;
+}
 
 export default class FormixStore<T extends object> {
   private _isSubmitting = false;

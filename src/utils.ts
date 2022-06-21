@@ -1,4 +1,4 @@
-import { PathParam } from './types';
+export type PathParam = Array<string | number> | string;
 
 export function stringToPath(string: string): Array<string | number> {
   const result: Array<string | number> = [];
