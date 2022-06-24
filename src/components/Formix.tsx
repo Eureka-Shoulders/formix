@@ -1,11 +1,12 @@
 import FormContext from '../context';
-import { useEffect, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useRef, useState } from 'react';
 import FormixStore, { GenericError } from '../FormixStore';
 
 export interface FormixProps<T extends object> {
   initialValues: T;
   enableReinitialize?: boolean;
   children: React.ReactNode;
+  style?: CSSProperties;
   onSubmit(values: T): Promise<void> | void;
   validate?: (values: T) => Promise<GenericError[]> | GenericError[];
   validationDebounce?: number;
@@ -26,6 +27,7 @@ export default function Formix<T extends object>(props: FormixProps<T>) {
     enableReinitialize,
     validationDebounce,
     children,
+    style,
     onSubmit,
     validate,
   } = props;
@@ -57,7 +59,9 @@ export default function Formix<T extends object>(props: FormixProps<T>) {
 
   return (
     <FormContext.Provider value={formix}>
-      <form onSubmit={handleSubmit}>{children}</form>
+      <form onSubmit={handleSubmit} style={style}>
+        {children}
+      </form>
     </FormContext.Provider>
   );
 }
