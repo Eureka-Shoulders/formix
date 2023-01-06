@@ -1,4 +1,4 @@
-import { makeAutoObservable, toJS, IObservableArray, action, flow } from 'mobx';
+import { makeAutoObservable, toJS, IObservableArray, action } from 'mobx';
 import { ArrayHelpers } from './components/ArrayField';
 import { FormixProps } from './components/Formix';
 import { get, PathParam, set } from './utils';
@@ -222,12 +222,12 @@ export default class FormixStore<T extends object> {
     });
   }
 
-  validate = flow(function* (this: FormixStore<T>) {
+  async validate() {
     if (!this._validateFunc) return;
 
     clearTimeout(this._validateTimeout);
 
-    const errors: GenericError[] = yield this._validateFunc(this.values);
+    const errors: GenericError[] = await this._validateFunc(this.values);
 
     if (!errors.length && !this.isValid) {
       return this.clearErrors();
@@ -245,7 +245,7 @@ export default class FormixStore<T extends object> {
 
       this.setError(path, error.message);
     });
-  });
+  }
 
   enqueueValidation() {
     clearTimeout(this._validateTimeout);
