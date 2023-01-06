@@ -10,6 +10,7 @@ export interface FormixProps<T extends object> {
   onSubmit(values: T): Promise<void> | void;
   validate?: (values: T) => Promise<GenericError[]> | GenericError[];
   validationDebounce?: number;
+  formProps?: React.FormHTMLAttributes<HTMLFormElement>;
 }
 
 /**
@@ -22,15 +23,7 @@ export interface FormixProps<T extends object> {
  * @param props - The props of the component.
  */
 export default function Formix<T extends object>(props: FormixProps<T>) {
-  const {
-    initialValues,
-    enableReinitialize,
-    validationDebounce,
-    children,
-    style,
-    onSubmit,
-    validate,
-  } = props;
+  const { initialValues, validationDebounce, onSubmit, validate } = props;
   const [formix] = useState(() => new FormixStore<T>(initialValues, onSubmit));
   const isFirstMount = useRef(true);
 
@@ -52,15 +45,15 @@ export default function Formix<T extends object>(props: FormixProps<T>) {
 
     formix.setOnSubmitFunc(onSubmit);
 
-    if (enableReinitialize) {
+    if (props.enableReinitialize) {
       formix.setInitialValues(initialValues);
     }
   }, [initialValues, onSubmit]);
 
   return (
     <FormContext.Provider value={formix}>
-      <form onSubmit={handleSubmit} style={style}>
-        {children}
+      <form onSubmit={handleSubmit} style={props.style} {...props.formProps}>
+        {props.children}
       </form>
     </FormContext.Provider>
   );
